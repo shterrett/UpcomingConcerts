@@ -101,7 +101,8 @@ func BuildConcertList() []Concert {
                        time: Time(performance),
                        day: Day(performance)}
     upcomingPerformances = append(upcomingPerformances, concert)
-    go SetWorks(&concert, link, done)
+    end := len(upcomingPerformances) - 1
+    go SetWorks(&upcomingPerformances[end], link, done)
   }
   j := 0
   for j < numberPerformances {
