@@ -6,6 +6,7 @@ import (
   "net/http"
   "fmt"
   "io/ioutil"
+  "encoding/json"
 )
 
 func Works(url string) string {
@@ -68,15 +69,15 @@ func PerformanceList() xml.Node {
 }
 
 type Concert struct {
-  title string
-  works string
-  day string
-  time string
+  Title string
+  Works string
+  Day string
+  Time string
 }
 
 func SetWorks(concert *Concert, link string, status chan int) {
   works := Works(link)
-  (*concert).works = works
+  (*concert).Works = works
   status <- 1
 }
 
@@ -97,12 +98,11 @@ func BuildConcertList() []Concert {
   for i := 0; i < numberPerformances; i++ {
     performance := performances[i]
     link := Link(performance)
-    concert := Concert{title: Title(performance),
-                       time: Time(performance),
-                       day: Day(performance)}
-    upcomingPerformances = append(upcomingPerformances, concert)
-    end := len(upcomingPerformances) - 1
-    go SetWorks(&upcomingPerformances[end], link, done)
+    concert := Concert{Title: Title(performance),
+                       Time: Time(performance),
+                       Day: Day(performance)}
+    upcomingPerformances[i] = concert
+    go SetWorks(&upcomingPerformances[i], link, done)
   }
   j := 0
   for j < numberPerformances {
@@ -111,7 +111,16 @@ func BuildConcertList() []Concert {
   return upcomingPerformances
 }
 
+type ConcertsHandler struct{}
+func (c ConcertsHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+  concerts := BuildConcertList()
+  concertsJson, _ := json.Marshal(concerts)
+  writer.Write(concertsJson)
+}
+
 
 func main() {
-  fmt.Println(BuildConcertList())
+  http.Handle("/", http.FileServer(http.Dir("./public")))
+  http.Handle("/concerts", ConcertsHandler{})
+  http.ListenAndServe("localhost:4000", nil)
 }
