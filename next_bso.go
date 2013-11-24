@@ -7,6 +7,7 @@ import (
   "fmt"
   "io/ioutil"
   "encoding/json"
+  "os"
 )
 
 func Works(url string) string {
@@ -136,5 +137,5 @@ func (c ConcertsHandler) ServeHTTP(writer http.ResponseWriter, request *http.Req
 func main() {
   http.Handle("/", http.FileServer(http.Dir("./public")))
   http.Handle("/concerts", ConcertsHandler{})
-  http.ListenAndServe("localhost:4000", nil)
+  http.ListenAndServe(":" + os.Getenv("PORT"), nil)
 }
