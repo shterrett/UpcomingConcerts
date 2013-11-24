@@ -29,9 +29,13 @@ func Works(url string) string {
 func Pieces(details xml.Node) string {
   pieces, _ := details.Search(".//div[@class='program-media-collapse']/h3")
   var piecesString string
+  piecesString = "<ul class=\"works\">"
   for _, piece := range(pieces) {
+    piecesString += "<li>"
     piecesString += piece.Content()
+    piecesString += "</li>"
   }
+  piecesString += "</ul>"
   return piecesString
 }
 
@@ -69,10 +73,16 @@ func PerformanceList() xml.Node {
 }
 
 type Concert struct {
-  Title string
-  Works string
-  Day string
-  Time string
+  Title string `json:"title"`
+  Works string `json:"works"`
+  Day string   `json:"day"`
+  Time string  `json:"time"`
+  Link string  `json:"link"`
+  Id int       `json:"id"`
+}
+
+type Concerts struct {
+  Concerts []Concert `json:"concerts"`
 }
 
 func SetWorks(concert *Concert, link string, status chan int) {
@@ -100,6 +110,8 @@ func BuildConcertList() []Concert {
     link := Link(performance)
     concert := Concert{Title: Title(performance),
                        Time: Time(performance),
+                       Id: i,
+                       Link: link,
                        Day: Day(performance)}
     upcomingPerformances[i] = concert
     go SetWorks(&upcomingPerformances[i], link, done)
@@ -113,8 +125,10 @@ func BuildConcertList() []Concert {
 
 type ConcertsHandler struct{}
 func (c ConcertsHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-  concerts := BuildConcertList()
+  concerts := Concerts{}
+  concerts.Concerts = BuildConcertList()
   concertsJson, _ := json.Marshal(concerts)
+  writer.Header().Set("Content-Type", "application/json")
   writer.Write(concertsJson)
 }
 

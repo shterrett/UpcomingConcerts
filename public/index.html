@@ -2,10 +2,36 @@
 <html>
   <head>
     <title>Upcoming BSO Concerts</title>
+    <link rel="stylesheet" href="styles/application.css">
   </head>
   <body>
-    <header>
-      <h1>Upcoming BSO Concerts</h1>
-    </header>
+    <script type="text/x-handlebars" data-template-name="concerts">
+      <header class="main">
+        <h1>Upcoming BSO Concerts</h1>
+      </header>
+      <ol class="concert-list">
+        {{#each}}
+          <li class="concert">
+          <header><h1><a {{bind-attr href=link}}{{title}}<a/></h1></header>
+            <div class="day">
+              {{day}}
+            </div>
+            <div class="time">
+              {{time}}
+            </div>
+            <div class="works">
+              {{safeWorks}}
+            </div>
+          </li>
+        {{/each}}
+      </ol>
+    </script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="js/libs/handlebars-1.0.0.js"></script>
+    <script src="js/libs/ember.js"></script>
+    <script src="js/libs/ember-data.js"></script>
+    <script src="js/application.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/models/concert.js"></script>
   </body>
 </html>
